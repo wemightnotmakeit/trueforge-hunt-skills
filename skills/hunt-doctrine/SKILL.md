@@ -37,17 +37,20 @@ Deployed ≠ repo. The gap is where live bugs hide:
 | G3 Repro | Does a one-command repro show the impact? | raw green output + pinned block |
 | G4 Verify | Did a SECOND party re-run it from scratch? | verifier's raw output |
 
-## 5. Report craft
+## 5. Impact amplification (before closing any MEDIUM)
+Try to CHAIN: compose this bug with one other (same target or adjacent) into a CRITICAL impact before submitting — chains pay at the top severity and rarely get duplicated. If no chain exists after one honest pass, ship the medium alone.
+
+## 6. Report craft
 Title = vulnerability + impact. Impact section = the program's own impact title + funds-at-risk math.
 PoC = the pinned repro command + raw output + negative control. Recommendation = minimal, honest.
 Attach everything; explain nothing twice.
 
-## 6. Tool guardrails (hard rules)
+## 7. Tool guardrails (hard rules)
 - **No live-network writes, ever:** `cast send`, `forge create`, `forge script --broadcast` only against local forks/anvil. If a PoC needs a mainnet state change, prove it on a pinned fork instead.
 - **GitHub MCP = read tools only** for sweeps (search/read). Never `delete_file`, `create_or_update_file`, or push unless the task explicitly says so.
 - **No secret exfil:** never print or send env vars/keys out of the sandbox; findings and logs only.
 
-## 7. Anti-patterns (measured, real)
+## 8. Anti-patterns (measured, real)
 - **Analyzer anchoring:** asking a model "is this finding real?" makes it agree. Ask it to BREAK a named invariant instead.
 - **Lexical anchoring:** suspicious names ≠ bugs. Judge by the invariant broken.
 - **Bigger context ≠ better:** bulk belongs in on-demand files, not always-loaded prompts.
