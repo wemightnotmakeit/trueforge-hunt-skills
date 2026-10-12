@@ -26,7 +26,7 @@ Deployed ≠ repo. The gap is where live bugs hide:
 
 ## 3. Dupe doctrine
 - First-COMPLETE wins. Same file + one-fix-fixes-both = same finding (dupe).
-- Sweep before building: known corpus, GitHub PRs/issues, program comments. Record the sweep.
+- Sweep before building: known corpus, GitHub PRs/issues, program comments, and web search over Solodit's indexed pages (`site:solodit.cyfrin.io <mechanism>` — keyless; the Solodit API is now paid-tier). Record the sweep.
 - Known-issue close needs the FULL mechanism + impact matched — "related" is not "same". If the fix is public but undeployed, the live vulnerable build is your counter.
 
 ## 4. Execution gates (every finding passes all four)
