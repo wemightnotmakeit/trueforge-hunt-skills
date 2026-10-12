@@ -87,3 +87,17 @@ forge test --fork-url https://ethereum-rpc.publicnode.com --fork-block-number 26
 - Fork RPC flaky → retry with a second RPC; record which one produced the output.
 - Still blocked → fall back to a raw `cast` call sequence that demonstrates the same state change,
   and document exactly why forge was unusable. A cast sequence is a weaker but valid artifact.
+
+## RPC PRESETS (fork tests — no keys needed)
+The sandbox bakes keyless public RPCs for 12 chains at `/opt/hunt-cache/rpcs.json` (2+ endpoints each).
+Pick a chain, take the first endpoint, fall back to the second on flake:
+
+```bash
+RPC=$(python3 -c "import json;print(json.load(open('/opt/hunt-cache/rpcs.json'))['base'][0])")
+forge test --match-test test_exploit -vvv --fork-url "$RPC" --fork-block-number <recent-block>
+# cast fallback:
+cast call <addr> "fn()" --rpc-url "$RPC"
+```
+
+Chains: ethereum, arbitrum, base, optimism, polygon, bsc, avalanche, gnosis, scroll, linea, blast, mantle.
+Public RPCs serve RECENT blocks well (fresh-deploy targets = perfect). For deep archive needs, note it in the candidate and use blockscout MCP source/state instead.
