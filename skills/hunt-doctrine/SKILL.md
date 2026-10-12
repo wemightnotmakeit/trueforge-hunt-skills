@@ -1,0 +1,49 @@
+---
+name: hunt-doctrine
+description: "The house rules for bounty hunting with a fleet: scope-first, seam-diff, dupe doctrine, execution gates, kill-recording. Use in every hunting role before acting on any lead."
+---
+
+# Hunt Doctrine (fleet edition)
+
+## 0. The prime rules
+1. **No reproduction command, no finding.** A claim without a green `forge test` (or equivalent raw output) on a pinned block is a lead, not a finding.
+2. **A KILL is a result.** Record cleared surfaces in DEAD.md — dead ends prevent the fleet from re-deriving them. Never "forget" a kill to look productive.
+3. **Never trust a summary — including your own.** For every external claim, require the handle (address, block, URL, SHA, path) and check it.
+4. **Honest severity only.** Map to the program's own impact titles, verbatim. No upgrading to please.
+
+## 1. Scope-first (before ANY hunting)
+- Read the program page: assets (file-level if "primacy of rules"), impact list, known issues, KYC/fee gates, prohibited activities (no mainnet testing! local forks only).
+- If scope lists FILE LINKS: that is the contract. Anything outside = not reportable, however buggy.
+- If scope says "code involving runtime pallets" or similar: impact that LANDS on an in-scope component counts — argue it explicitly, never assume.
+- Check the program's knownIssues list + the repo's public post-mortems before investing. An empty KI list is a green light, not a promise.
+
+## 2. Seam-diff (the highest-yield pattern)
+Deployed ≠ repo. The gap is where live bugs hide:
+1. Get deployed version: explorer metadata, `spec_version`, impl slot, program dump.
+2. Get repo HEAD + recent commits touching in-scope files.
+3. Find fixes that are **merged but NOT deployed** — each is a documented, live vulnerability (the project proved the bug themselves).
+4. Reproduce pre-fix behavior (worktree at the fix's parent) — the fix's own test often IS the PoC.
+
+## 3. Dupe doctrine
+- First-COMPLETE wins. Same file + one-fix-fixes-both = same finding (dupe).
+- Sweep before building: known corpus, GitHub PRs/issues, program comments. Record the sweep.
+- Known-issue close needs the FULL mechanism + impact matched — "related" is not "same". If the fix is public but undeployed, the live vulnerable build is your counter.
+
+## 4. Execution gates (every finding passes all four)
+| Gate | Question | Evidence |
+|---|---|---|
+| G1 Scope | Is the asset in scope per the exact list? | quote the scope line |
+| G2 Dupe | Is this mechanism already known/reported? | sweep receipt |
+| G3 Repro | Does a one-command repro show the impact? | raw green output + pinned block |
+| G4 Verify | Did a SECOND party re-run it from scratch? | verifier's raw output |
+
+## 5. Report craft
+Title = vulnerability + impact. Impact section = the program's own impact title + funds-at-risk math.
+PoC = the pinned repro command + raw output + negative control. Recommendation = minimal, honest.
+Attach everything; explain nothing twice.
+
+## 6. Anti-patterns (measured, real)
+- **Analyzer anchoring:** asking a model "is this finding real?" makes it agree. Ask it to BREAK a named invariant instead.
+- **Lexical anchoring:** suspicious names ≠ bugs. Judge by the invariant broken.
+- **Bigger context ≠ better:** bulk belongs in on-demand files, not always-loaded prompts.
+- **Tool-text reports:** Immunefi treats scanner-dump reports as spam. Findings must be human-crafted.
