@@ -55,3 +55,16 @@ Attach everything; explain nothing twice.
 - **Lexical anchoring:** suspicious names ≠ bugs. Judge by the invariant broken.
 - **Bigger context ≠ better:** bulk belongs in on-demand files, not always-loaded prompts.
 - **Tool-text reports:** Immunefi treats scanner-dump reports as spam. Findings must be human-crafted.
+
+## 9. Turn economy & infra reality (2026-10-13, live incident)
+- The server CANCELS turns at ~60 min (server-execution-timeout). Write state + post the <=5-line report by minute ~50. ONE bounded wave per turn (scout | hunt | verify+package) - never chain long waves.
+- State hygiene: keep /opt/hunt-state/STATE.md (one page: board, active candidates, kill count, next actions) updated at turn END. Next turn reads STATE.md FIRST - re-orientation from raw context is the biggest silent time sink.
+- Skills may be unmounted (/opt/tf/skills empty). Check ONCE; if missing, proceed with in-context doctrine - do not burn cycles searching for skill files.
+- GITHUB_TOKEN exists only in sandboxes created AFTER the secret was attached. Repo sync is best-effort; /opt/hunt-state is canonical.
+
+## 10. Falsification-first (verifier standard - campaign 2026-10-13 receipts)
+Before ANY candidate may be called a survivor, it needs receipts for all three attacks:
+1. HEAD-TO-HEAD DELTA (economic claims): measure value delivered to legit actor vs attacker under identical conditions. Delta = 0 -> KILL. (Receipt: v4lend autoCollect "1% skim" - owner-trigger vs attacker-trigger outflow measured IDENTICAL; documented keeper bounty -> <=Low.)
+2. DOMINANCE TEST (capability claims): is the claimed gain reachable WITHOUT the mechanism? If yes -> KILL. (Receipt: claimed cap over-borrow of 201e18 reachable with ZERO withdrawal -> netting adds nothing.)
+3. DOCS-LEDGER SWEEP (design-gap claims): grep docs/, audit-handoff files, AND the fix commit's own messages/comments for documented-by-design intent BEFORE claiming a design gap. (Receipt: 'netting' lines were the team's own accepted V4LE-122/127 fix; its comment defines FIFO flow attribution.)
+Log ALL THREE attempts + results in the candidate packet - a candidate without falsification receipts is not a survivor.

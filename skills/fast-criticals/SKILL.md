@@ -96,3 +96,10 @@ KILL: symmetric accounting proven by test.
 - Breadth first: 8-12 parallel briefs per target beats 2 deep ones — kills are cheap, misses are not.
 - Every survivor still passes: red-team -> poc-forge -> verifier. The gates are what keep accuracy at 100%.
 - Log every kill to DEAD.md — a re-derived kill is wasted compute.
+
+## Target freshness (2026-10-13 lesson - v4lend: 25+ kills, 0 survivors)
+Post-audit code + 1,000+ submission contests = kill-heavy: every lead traced to documented design or already-fixed code. Rank candidate ground by freshness BEFORE intake:
+1. Fix merged NOT deployed (seam-diff) - THE lane. Verify deployed-vs-repo divergence first.
+2. Repo/contracts PUSHED very recently (check pushed_at via API; days not months) or contracts deployed <90 days.
+3. Fresh contests with zero/low prior audit history - but dupe-sweep FIRST (expect other hunters).
+Check repo recency + fix-deploy gap in the first 5 minutes of intake; reject mined-out ground early. Kills are cheap, wasted campaigns are not.

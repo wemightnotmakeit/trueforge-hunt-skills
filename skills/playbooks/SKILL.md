@@ -25,3 +25,8 @@ Grep this skill's references/ dir for keywords from your lead (function names, s
 
 ## GROWTH RULE
 One verified finding = one case entry (target, mechanism, root cause, fix, proof). Quality over quantity — a playbook is only as good as its kill signals.
+
+## CASE ENTRIES - falsification receipts (2026-10-13)
+- CASE: "caller-unvalidated reward path" (FALSE POSITIVE pattern): unbound `caller` receives a % reward -> looks like missing authorization. KILL CHECK: measure outflow owner-trigger vs attacker-trigger; if identical and docs describe the path as permissionless/keeper-bounty -> <=Low. Grep handoff docs for 'permissionless'/'keeper'.
+- CASE: "accounting skew props a cap" (FALSE POSITIVE pattern): claimed invariant break inflates a limit -> looks like cap bypass. KILL CHECK: dominance - can the claimed over-limit action be done with ZERO interaction of the mechanism? Read the fix commit's own comment for flow-attribution semantics (FIFO). If yes -> no incremental capability -> kill.
+- RULE: log both attacks (delta + dominance) with commands+results for every candidate; survivors ship with falsification receipts attached.
