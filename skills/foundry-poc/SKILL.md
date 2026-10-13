@@ -15,10 +15,13 @@ The sandbox's internet = GitHub/PyPI only. **`cast --rpc-url` and `forge --fork-
 sandbox** (connection reset) — do not burn cycles retrying. Split the workflow:
 - **In-sandbox (works):** source analysis, blockscout MCP calls (server-side — live chain data, ABIs,
   txs, balances), writing + compiling the test (`forge build`; solc from the 8 pre-installed versions).
-- **Fork execution (local rig):** deliver the test file + ONE exact command
-  (`forge test --fork-url <RPC> --fork-block-number <N> --match-test <name> -vvv`, N pinned from the
-  blockscout latest block) and tag the packet `FORK-PENDING-LOCAL`. The operator runs it on the local
-  rig (full RPC) and returns raw output. That output is the round-trip evidence.
+- **Fork execution — use the `fork-ops` MCP tool (FIRST CHOICE, live since 2026-10-13):** call
+  `fork_run` with `{repo, commit?, files: [{path, content}], match?, fork_url?, block?, wait_s?}` — it
+  clones the repo and runs `forge test` on the OPERATOR PC (unrestricted RPC, full toolchain), then
+  returns exact output via `fork_status(job_id)`. Treat that raw output as the authoritative proof —
+  no hand-off needed. Use for: fork tests, RPC calls, uncached solc versions, any compile-blocked PoC.
+- **LAST RESORT (fork-ops down):** deliver the test file + ONE exact command tagged
+  `FORK-PENDING-LOCAL` (N pinned from blockscout latest block) for the operator to run.
 - If a boot test ever shows RPC reachable again (tier upgraded), delete this section and fork normally.
 
 ## 1. Project bootstrap (fresh sandbox)

@@ -68,3 +68,12 @@ Before ANY candidate may be called a survivor, it needs receipts for all three a
 2. DOMINANCE TEST (capability claims): is the claimed gain reachable WITHOUT the mechanism? If yes -> KILL. (Receipt: claimed cap over-borrow of 201e18 reachable with ZERO withdrawal -> netting adds nothing.)
 3. DOCS-LEDGER SWEEP (design-gap claims): grep docs/, audit-handoff files, AND the fix commit's own messages/comments for documented-by-design intent BEFORE claiming a design gap. (Receipt: 'netting' lines were the team's own accepted V4LE-122/127 fix; its comment defines FIFO flow attribution.)
 Log ALL THREE attempts + results in the candidate packet - a candidate without falsification receipts is not a survivor.
+
+## 11. Fork-ops + scheduled runs (live 2026-10-13)
+- **fork-ops** = MCP tool `fork_run` / `fork_status` / `fork_jobs` — executes forge tests on the operator
+  PC (unrestricted network). Sandbox blocked (RPC, solc gap, compile fail)? Route the proof through
+  fork-ops; its raw output is valid evidence (same bar: no output, no finding).
+- **Scheduled campaigns**: the fleet runs under a TrueForge schedule ("auto-campaign"). Every scheduled
+  run MUST end around minute 50 with: state synced (BOARD/DEAD/STATE + hunt-state push), kills recorded,
+  and a loud report of any survivor. The next scheduled run resumes from your artifacts — leave nothing
+  only in your head.
