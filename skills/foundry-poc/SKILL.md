@@ -36,6 +36,8 @@ remappings = ["forge-std/=lib/forge-std/src/", "ds-test/=lib/forge-std/lib/ds-te
 mainnet = "${ETH_RPC_URL}"
 ```
 If forge-std missing: `git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std`.
+**Compiler pin (required — solc autodownload is blocked in-sandbox):** `cp /opt/hunt-cache/poc-template/foundry.toml .`
+— it sets `solc = "/usr/local/bin/solc"` (0.8.28 via solc-select). Different pragma: `solc-select use 0.8.19` first — the same path then serves that version. If your project already has a foundry.toml, just add the `solc` line.
 
 ## 2. Pin the fork (always)
 ```bash
