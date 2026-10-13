@@ -10,6 +10,17 @@ A finding exists only when `forge test` is GREEN and the test asserts the actual
 (funds moved / invariant broken / legit path reverts) — on a **pinned fork block**.
 No green output = no finding. Every artifact ships with `reproduce.sh`.
 
+## 0. SANDBOX NETWORK REALITY (Tier-1 — read before §2)
+The sandbox's internet = GitHub/PyPI only. **`cast --rpc-url` and `forge --fork-url` FAIL inside the
+sandbox** (connection reset) — do not burn cycles retrying. Split the workflow:
+- **In-sandbox (works):** source analysis, blockscout MCP calls (server-side — live chain data, ABIs,
+  txs, balances), writing + compiling the test (`forge build`; solc from the 8 pre-installed versions).
+- **Fork execution (local rig):** deliver the test file + ONE exact command
+  (`forge test --fork-url <RPC> --fork-block-number <N> --match-test <name> -vvv`, N pinned from the
+  blockscout latest block) and tag the packet `FORK-PENDING-LOCAL`. The operator runs it on the local
+  rig (full RPC) and returns raw output. That output is the round-trip evidence.
+- If a boot test ever shows RPC reachable again (tier upgraded), delete this section and fork normally.
+
 ## 1. Project bootstrap (fresh sandbox)
 ```bash
 forge init poc && cd poc
@@ -31,7 +42,7 @@ If forge-std missing: `git clone --depth 1 https://github.com/foundry-rs/forge-s
 forge test --fork-url $RPC --fork-block-number <N> -vvv
 ```
 - Record `N` in the test file header AND in the report. Never rely on "latest".
-- Verify the fork works first: `cast block-number --rpc-url $RPC`.
+- Verify the fork works first on the LOCAL RIG: `cast block-number --rpc-url $RPC` (§0 — not in-sandbox).
 - Free RPCs: ethereum-rpc.publicnode.com · base-rpc.publicnode.com · bsc-rpc.publicnode.com ·
   rpc.gnosischain.com · eth.drpc.org · solana-rpc.publicnode.com (solana = different toolchain).
 
