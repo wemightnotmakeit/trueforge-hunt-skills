@@ -59,7 +59,7 @@ Attach everything; explain nothing twice.
 ## 9. Turn economy & infra reality (2026-10-13, live incident)
 - The server CANCELS turns at ~60 min (server-execution-timeout). Write state + post the <=5-line report by minute ~50. ONE bounded wave per turn (scout | hunt | verify+package) - never chain long waves.
 - State hygiene: keep /opt/hunt-state/STATE.md (one page: board, active candidates, kill count, next actions) updated at turn END. Next turn reads STATE.md FIRST - re-orientation from raw context is the biggest silent time sink.
-- Skills may be unmounted (/opt/tf/skills empty). Check ONCE; if missing, proceed with in-context doctrine - do not burn cycles searching for skill files.
+- Skills paths: CANONICAL = /opt/tfy/skills (TrueForge). Env v6 bakes an always-present copy: /opt/tf/skills (=symlink to /opt/hunt-cache/fleet-skills). If one path is empty, try the other; restore with `cp -r /opt/hunt-cache/fleet-skills/* /opt/tfy/skills/`. Check ONCE; never burn cycles searching.
 - GITHUB_TOKEN exists only in sandboxes created AFTER the secret was attached. Repo sync is best-effort; /opt/hunt-state is canonical.
 
 ## 10. Falsification-first (verifier standard - campaign 2026-10-13 receipts)
