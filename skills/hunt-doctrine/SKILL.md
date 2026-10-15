@@ -77,3 +77,31 @@ Log ALL THREE attempts + results in the candidate packet - a candidate without f
   run MUST end around minute 50 with: state synced (BOARD/DEAD/STATE + hunt-state push), kills recorded,
   and a loud report of any survivor. The next scheduled run resumes from your artifacts — leave nothing
   only in your head.
+
+## 12. Tool surface & MCP API (read BEFORE your first tool call)
+There are TWO different tool surfaces. Confusing them burns your turn wall and returns NOTHING.
+
+**A. Native tools (preferred — no sandbox, no import).** Call these directly as tools:
+- `list_tools` — discover tools on a server: `{"mcp_server": "<name>"}`
+- `get_tool_info` — inspect one tool's schema
+- `call_tool` — invoke it
+These do NOT need the sandbox and do NOT ride NATS. They are the reliable path.
+
+**B. Sandbox code-mode MCP (alternate — rides NATS).** Inside `exec`, in Python:
+```python
+from mcp_client import call_tool          # ASYNC
+result = await call_tool("<server>", "<tool>", { ... })   # (server, tool, body)
+```
+CLI form: `python mcp_client.py call-tool <server> <tool> '<json>'`
+
+**The two errors that keep killing runs — do not repeat them:**
+- `from mcp_client import call_tool, list_tools` -> **ImportError**. `mcp_client` has NO `list_tools` symbol. Only `call_tool`.
+- `python mcp_client.py list-tools ...` -> **argparse error**. `call-tool` is the ONLY subcommand.
+
+If you need to DISCOVER tools, use the native `list_tools` tool. Never try to list tools through `mcp_client`.
+
+**Failure budget (hard rule).** If a tool call fails TWICE, stop and switch surface (sandbox <-> native
+<-> fork-ops). Record the failure in STATE.md and continue. Burning all 8 turns retrying one broken
+import produces zero output and looks, from the outside, exactly like laziness. It is not: it is a
+tooling dead end, and the fix is to route around it and say so.
+
