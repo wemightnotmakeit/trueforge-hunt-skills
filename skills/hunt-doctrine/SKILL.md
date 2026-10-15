@@ -105,3 +105,22 @@ If you need to DISCOVER tools, use the native `list_tools` tool. Never try to li
 import produces zero output and looks, from the outside, exactly like laziness. It is not: it is a
 tooling dead end, and the fix is to route around it and say so.
 
+## 13. The local bridge (sandbox egress is NOT your limit)
+The sandbox is network-restricted, but there is an **unrestricted machine behind it**. Use it
+instead of giving up on a blocked fetch:
+
+- **`local_worker`** (fork-ops MCP) — spawns the LOCAL agent on the operator PC with the FULL
+  toolset and **unrestricted network**. Use it for: fetching a URL the sandbox cannot reach
+  (Cloudflare/bot-wall/timeout), pulling a blocked resource, or any multi-step local operation.
+  `{"task": "<precise instruction>"}` -> job_id -> poll `fork_status`.
+- **`fork_run`** (fork-ops MCP) — runs a Foundry test suite on the operator PC: unrestricted RPC,
+  local foundry, any solc version. Use it when the sandbox cannot compile, lacks solc, or cannot
+  reach the RPC. Its raw output is valid evidence (same bar: no output, no finding).
+- **`cleanup_sandboxes`** — call it if you are blocked by "Total memory limit exceeded" (the org
+  cap is 10 GiB and one sandbox is 8 GiB, so exactly ONE sandbox agent runs at a time; a leaked
+  sandbox from a previous run will block you).
+
+**If a fetch fails in the sandbox, the answer is `local_worker`, not "source unavailable".**
+Saying "the source is behind Cloudflare so I could not proceed" is a self-inflicted dead end.
+
+
