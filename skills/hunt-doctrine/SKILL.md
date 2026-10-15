@@ -24,6 +24,15 @@ Deployed ≠ repo. The gap is where live bugs hide:
 3. Find fixes that are **merged but NOT deployed** — each is a documented, live vulnerability (the project proved the bug themselves).
 4. Reproduce pre-fix behavior (worktree at the fix's parent) — the fix's own test often IS the PoC.
 
+**A FAILED COMMAND IS NOT EVIDENCE OF ABSENCE (measured failure).** `git log <parent>..HEAD -- <files>`
+returning nothing is only meaningful if the clone SUCCEEDED and the command actually RAN. A flaky
+clone (`fatal: early EOF`) or a command in a non-repo prints nothing / errors, and reporting that as
+"seam width is zero" is a **false zero** — the worst output you can produce, because it looks like
+rigorous work and it is filed as a kill. A real CEI reentrancy fix was missed exactly this way.
+Before ANY negative claim: confirm the clone landed (`git rev-parse HEAD`), confirm the file exists at
+that path (`git log --oneline -1 -- <file>`), and only then conclude. If the clone failed, that is a
+TOOLING failure to report and route around (`local_worker`), never a narrow seam.
+
 ## 3. Dupe doctrine
 - First-COMPLETE wins. Same file + one-fix-fixes-both = same finding (dupe).
 - Sweep before building: known corpus, GitHub PRs/issues, program comments, and web search over Solodit's indexed pages (`site:solodit.cyfrin.io <mechanism>` — keyless; the Solodit API is now paid-tier). Record the sweep.
