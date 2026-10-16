@@ -158,4 +158,41 @@ write before you stop. This is not optional and not target-specific.
 `MEMORY.md` is **generated** from `DEAD.md` / `CANDIDATES.md` / `FINDINGS.md` — never hand-edit
 it. Keep those three truthful and the memory maintains itself.
 
+## 15. THE GATE IS STRUCTURAL, NOT A SCORE (operator, 2026-10-16)
+
+The fleet was self-censoring. A hunter whose own confidence felt low filed the lead as a kill to
+DEAD.md, where it became invisible; anything between the hunter's floor and the campaigner's bar
+was produced and then silently dropped. A real lead (Ondo/Tempo `minPrice=0` depeg) was lost this
+way. **Confidence is an uncalibrated self-report and must never decide whether a candidate is
+examined at all.**
+
+**Escalation predicate — mechanical, read off the candidate itself.** A candidate GOES TO THE
+VERIFIER if it has all four of the following. This is the ONLY test:
+
+| # | Element | Test |
+|---|---|---|
+| E1 | LOCUS | a concrete `file:line` at the pinned commit, or a deployed address + function selector |
+| E2 | GUARD | the named check/validation the exploit must bypass, quoted from source |
+| E3 | FALSIFIABLE CLAIM | the exploit predicts an observable — state the test that passes if true, and reverts/fails if false |
+| E4 | IN SCOPE | the asset appears on the program's own list |
+
+Any candidate with E1–E4 is escalated **regardless of any confidence number**. Confidence ranks
+the QUEUE (which candidate first). It never grants or denies PERMISSION.
+
+**A KILL REQUIRES A FALSIFICATION RECEIPT.** A kill is legitimate only when it carries at least one
+§10 attack WITH its result recorded: the dominance test (the gain is reachable without the
+mechanism), the head-to-head delta (attacker and legitimate actor are indistinguishable), or the
+docs-ledger sweep (the team documented the behaviour as intended, with the quote). "I could not
+see how to exploit it", "confidence too low", "probably by design", an unreadable target, or a
+timeout is **NOT a kill** — it is an **UNADJUDICATED candidate** and it returns to the queue.
+
+**Cold-case pass.** At the start of each wave, re-adjudicate every DEAD.md entry that carries no
+falsification receipt against the current pin. The absence of a receipt is the trigger — no list
+is kept, because none is needed.
+
+Why this is permanent and target-free: every element is read off the artifact, not off a list or a
+number. Nothing here names a protocol, a severity, or a threshold, so it cannot go stale when the
+board rotates. The INDEPENDENT VERIFIER, not the generator, is the filter — and it is the only
+party whose output may end a candidate.
+
 
