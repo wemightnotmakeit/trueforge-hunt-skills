@@ -284,4 +284,25 @@ Why this beats more lanes: lane volume multiplies whatever your hit rate already
 no-seam target has an expected yield near zero for full price, so gating it is worth more than N
 extra lanes aimed the same way.
 
+**Implemented — CALL IT, do not re-derive it:** `scripts/seam_gate.py` ships with this skill.
+
+```python
+import sys; sys.path.insert(0, "/opt/tfy/skills/hunt-doctrine/scripts")
+from seam_gate import seam_decision
+action, reason, passing = seam_decision(scout_contracts)   # action in {"spawn","block"}
+```
+
+`scout_contracts` is ONE dict per in-scope deployed contract:
+`{address, name?, in_scope?, has_verified_source?, deployed_match?, repo_fix_undeployed?}`.
+
+- `deployed_match=False` -> bytecode seam. `repo_fix_undeployed=True` -> the ENS E1 seam.
+  `has_verified_source=False` -> unknown, which is probe-worthy, NOT safe.
+- **Unknown (`None`) is not evidence of a seam.** The gate BLOCKS rather than inventing one, so a
+  field you did not check can never manufacture a wave.
+- It is indifferent to protocol names — the predicate reads the target's own facts, so it cannot
+  go stale when the board rotates.
+- It reproduces history: the fBTC configuration (all contracts `deployed_match`) returns **block**;
+  the ENS E1 configuration (undeployed fix) returns **spawn**. Self-test:
+  `python3 /opt/tfy/skills/hunt-doctrine/scripts/seam_gate.py selftest`.
+
 
