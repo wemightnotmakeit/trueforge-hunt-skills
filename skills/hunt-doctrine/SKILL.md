@@ -162,9 +162,17 @@ it. Keep those three truthful and the memory maintains itself.
 
 The fleet was self-censoring. A hunter whose own confidence felt low filed the lead as a kill to
 DEAD.md, where it became invisible; anything between the hunter's floor and the campaigner's bar
-was produced and then silently dropped. A real lead (Ondo/Tempo `minPrice=0` depeg) was lost this
-way. **Confidence is an uncalibrated self-report and must never decide whether a candidate is
-examined at all.**
+was produced and then silently dropped. **Confidence is an uncalibrated self-report and must never
+decide whether a candidate is examined at all.**
+
+**The one observed instance, stated precisely** (Ondo/Tempo, `OndoTokenRouter.sol:254-271`,
+`minPrice=0` live on chainId 4217): the hunter filed its own report **DRY (0 candidates ≥0.75)**, so
+the candidate was never escalated and never examined by the verifier — it surfaced only because a
+human read the raw report. **Honest caveat: that same candidate also dies independently on impact**
+(the Tempo stack shows ~zero live usage, no USDY balance, FaR ~nil — BOARD.md, receipt-backed). So
+this is an example of the gate **hiding a candidate from review**, NOT of a proven lost finding.
+Do not claim the gate has cost us a submission until a candidate exists that passes every other
+gate and was stopped by the score alone.
 
 **Escalation predicate — mechanical, read off the candidate itself.** A candidate GOES TO THE
 VERIFIER if it has all four of the following. This is the ONLY test:
