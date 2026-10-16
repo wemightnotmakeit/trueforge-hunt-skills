@@ -305,4 +305,30 @@ action, reason, passing = seam_decision(scout_contracts)   # action in {"spawn",
   the ENS E1 configuration (undeployed fix) returns **spawn**. Self-test:
   `python3 /opt/tfy/skills/hunt-doctrine/scripts/seam_gate.py selftest`.
 
+## 18. PUSHING TO THE SHARED REPO — rebase, retry, NEVER force (operator, 2026-10-16)
+
+`/opt/hunt-state` is ONE repo that MANY writers push: every sandbox at turn end, plus the
+operator's sync daemon. Two writers cannot both be latest, so a push can be rejected inside the
+window between your pull and your push. Losing that race silently loses your kill rows and
+candidate edits — the memory the NEXT run depends on — while your turn still reports success. The
+operator's daemon had exactly this bug: a rejected push was only logged, so the commit sat local
+forever.
+
+Rule when you push:
+1. `git -C /opt/hunt-state pull --rebase --autostash` immediately before `push`.
+2. If the push is rejected (non-fast-forward / "fetch first" / "Updates were rejected"), pull
+   --rebase again and retry, with bounded attempts and backoff. A rejection is a race you can win.
+   A rebase CONFLICT is not — stop and surface it rather than looping.
+3. **NEVER `git push --force` / `--force-with-lease` on hunt-state.** A force-push discards
+   another writer's kills, which is the exact loss this rule prevents.
+4. Do not retry what retrying cannot fix (auth, DNS, no upstream) — report it.
+
+Helper (ships with this skill):
+`python3 /opt/tfy/skills/hunt-doctrine/scripts/git_safe.py selftest`, then
+```python
+import sys; sys.path.insert(0, "/opt/tfy/skills/hunt-doctrine/scripts")
+from git_safe import sync_push
+ok, why = sync_push("/opt/hunt-state", message="STATE: <campaign> turn end")
+```
+
 
