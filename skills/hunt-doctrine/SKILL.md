@@ -209,4 +209,44 @@ number. Nothing here names a protocol, a severity, or a threshold, so it cannot 
 board rotates. The INDEPENDENT VERIFIER, not the generator, is the filter — and it is the only
 party whose output may end a candidate.
 
+## 16. TOLERANT PARSING — import fleetlib, do not hand-roll (operator, 2026-10-16)
+
+Measured over 349 "Sandbox code error" hits, classified by the LAST line of the traceback:
+
+| count | failure |
+|---|---|
+| 75 | `KeyError: 'result'` — assumes the exec envelope always has `result` |
+| 28 | `Usage: cast index <KEY_TYPE> <KEY> <SLOT_NUMBER>` — wrong arity |
+| 23 | `ValueError: invalid literal for int() with base 16: '0x'` — empty hex parsed as int |
+| 12 | `KeyError: slice(None, 800, None)` — `x[:800]` applied to a dict |
+| 11 | `KeyError: 'matches'` — assumed key on an API response |
+| 9 | `ImportError: cannot import name 'list_tools' from 'mcp_client'` |
+
+Every one is the SAME root cause: ad-hoc code ASSUMES a response shape and dies when the shape
+differs, then burns turnaround retrying. A doc that says "do not repeat this" is weaker than a
+function that cannot fail — §12 already documented the `list_tools` trap and it still fired 9 times.
+
+`scripts/fleetlib.py` ships with this skill (sandbox path:
+`/opt/tfy/skills/hunt-doctrine/scripts/fleetlib.py`).
+
+```python
+import sys; sys.path.insert(0, "/opt/tfy/skills/hunt-doctrine/scripts")
+from fleetlib import env, jget, to_int, cut, cast_index
+
+code, text, data = env(raw)            # never raises; missing 'result' -> (None, "", None)
+items = jget(resp, "items", [])        # missing key -> default, never KeyError
+v     = to_int("0x")                   # -> None   (was: ValueError crash)
+head  = cut(big, 800)                  # str by chars; dict/list by ITEM COUNT
+argv  = ["cast", "index"] + cast_index("address", "0xabc", 3)
+```
+
+Rules:
+- Never index a tool/API response as `["result"]` / `["items"]` / `["matches"]` — use `env()` and
+  `jget()` with an explicit default.
+- Never `int(x, 16)` on a value that may be `'0x'`/`''`/`None` — use `to_int`.
+- Never slice `x[:800]` unless `x` is known to be a string — use `cut`.
+- A `NameError` (e.g. `ph_re`) is a typo in YOUR OWN snippet, not a tooling failure. Re-read the
+  snippet before re-running it; do not reinterpret it as an infra problem.
+- Self-test with `python3 .../scripts/test_fleetlib.py` if you doubt the helpers.
+
 
