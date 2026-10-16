@@ -186,6 +186,12 @@ docs-ledger sweep (the team documented the behaviour as intended, with the quote
 see how to exploit it", "confidence too low", "probably by design", an unreadable target, or a
 timeout is **NOT a kill** — it is an **UNADJUDICATED candidate** and it returns to the queue.
 
+The mechanical test, applied by the ledger on every build: **does the kill cite ANY artifact?** —
+a file:line, an address or tx hash, a `.md`/`.txt`/`.json`/`.diff` artifact, a commit, a PR or
+issue number, a job id, or one of the §10 attack names with a result. A kill that cites nothing is
+listed under **UNADJUDICATED** in `MEMORY.md`. Saying "probably by design" without the quote is not
+citing anything.
+
 **Cold-case pass.** At the start of each wave, re-adjudicate every DEAD.md entry that carries no
 falsification receipt against the current pin. The absence of a receipt is the trigger — no list
 is kept, because none is needed.
