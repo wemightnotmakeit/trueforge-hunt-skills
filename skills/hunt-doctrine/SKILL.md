@@ -183,6 +183,16 @@ VERIFIER if it has all four of the following. This is the ONLY test:
 | E2 | GUARD | the named check/validation the exploit must bypass, quoted from source |
 | E3 | FALSIFIABLE CLAIM | the exploit predicts an observable — state the test that passes if true, and reverts/fails if false |
 | E4 | IN SCOPE | the asset appears on the program's own list |
+| E5 | PRECONDITION LIVENESS | who can create the vulnerable state on the LIVE deployment, with what permission and capital, cited to a live address or tx |
+
+**E1–E4 decide ESCALATION. E5 decides SUBMISSION.** A candidate can pass E1-E4 and be verified
+3/3 green in a fork test and still be unpublishable, because a fork test proves the *mechanism*,
+not that a real attacker can *reach the state*. `vm.prank` / `vm.store` / hand-arranged fork state
+make a green PoC that the program answers with "state not reachable in practice". The verifier
+re-running the same harness is independent across EXECUTORS, not across ASSUMPTIONS: neither run
+tests reachability on the live deployment. So the packet must state, in its own field, who can
+create the precondition live — and if that cannot be cited, the candidate is a mechanism demo,
+not a submission. This is necessary, not sufficient: reachability argued in prose is not proof.
 
 Any candidate with E1–E4 is escalated **regardless of any confidence number**. Confidence ranks
 the QUEUE (which candidate first). It never grants or denies PERMISSION.
@@ -248,5 +258,30 @@ Rules:
 - A `NameError` (e.g. `ph_re`) is a typo in YOUR OWN snippet, not a tooling failure. Re-read the
   snippet before re-running it; do not reinterpret it as an infra problem.
 - Self-test with `python3 .../scripts/test_fleetlib.py` if you doubt the helpers.
+
+## 17. THE SEAM GATE — no hunter wave without a proven deploy-vs-repo difference (operator, 2026-10-16)
+
+A hunter wave is the most expensive thing the fleet buys. The measured evidence says waves are
+routinely spent on targets that cannot contain a bug: fBTC run21 spent 2 hunters and 15 kills to
+discover `Deployed == HEAD` for all 5 in-scope contracts; GMX burned 17 kills and Onyx a full wave
+on no-seam targets. The bench rate (3/10 clean hits) is the fleet's own best predictor of this.
+
+**Rule: a hunter wave spawns only when at least one in-scope deployed contract differs from the
+repo's HEAD for that contract.** "Differs" means one of:
+1. the deployed bytecode is not the compiled HEAD source (self-verify: fetch verified source, compile
+   at the declared version, compare runtime bytecode), or
+2. the repo shows a fix/PR touching that file that is **not** in the deployed build (a merged-but-
+   undeployed fix is the ENS E1 pattern — the proven producer of real findings), or
+3. the deployed address has no verified source at all (unknown ≠ safe; it is probe-worthy, not
+   wave-worthy, until the interface is known).
+
+If no in-scope contract passes, the target is **PARKED with the receipt** and NO hunters spawn. The
+`scout` already gathers exactly this data (impl pointers, `deployed==HEAD` checks, `impl_match`
+fields) — the change is to make wave spawn **conditional** on it instead of recording it after the
+spend. This is derived, not hardcoded: the predicate reads off the target, never off a name list.
+
+Why this beats more lanes: lane volume multiplies whatever your hit rate already is. A wave on a
+no-seam target has an expected yield near zero for full price, so gating it is worth more than N
+extra lanes aimed the same way.
 
 
