@@ -132,4 +132,30 @@ instead of giving up on a blocked fetch:
 **If a fetch fails in the sandbox, the answer is `local_worker`, not "source unavailable".**
 Saying "the source is behind Cloudflare so I could not proceed" is a self-inflicted dead end.
 
+## 14. READ-FIRST / WRITE-LAST (memory across runs)
+
+You wake as a **fresh session every run**. You have no memory of the last one. The fleet's
+memory therefore does not live in you — it lives in files you must read before you think and
+write before you stop. This is not optional and not target-specific.
+
+**On boot, before scoring anything, you MUST read:**
+1. `/opt/hunt-state/MEMORY.md` — the generated read-first contract: where we stand, the
+   **DO-NOT-RE-DERIVE** list of killed mechanisms (with kill dates), and the
+   **ALREADY-PAID-FOR-TWICE** list.
+2. `/opt/hunt-state/LEDGER.md` — the full ledger (candidates, kills, reasons).
+3. `/opt/hunt-state/DEAD.md` and `CANDIDATES.md` — the raw sources the ledger is built from.
+
+**Rules that follow from it:**
+- Nothing under **DO-NOT-RE-DERIVE** may be re-derived *unless the code changed since its kill
+  date*. Re-deriving a kill is the single most expensive mistake this fleet makes — it costs a
+  whole sandbox wave and produces nothing new.
+- Nothing under **ALREADY-PAID-FOR-TWICE** may be hunted again, at all.
+- A candidate or a kill that is **not written down did not happen**. Write it the moment a hunter
+  returns — before the sandbox can die mid-run. Deferring ledger writes loses candidates.
+- Record **what bug, named by mechanism** — not *who looked*. A row says
+  "IRMLinearKink does not bound kink_", never "hunter-euler-h3".
+
+`MEMORY.md` is **generated** from `DEAD.md` / `CANDIDATES.md` / `FINDINGS.md` — never hand-edit
+it. Keep those three truthful and the memory maintains itself.
+
 
