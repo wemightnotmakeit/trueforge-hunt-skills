@@ -21,6 +21,7 @@ CLI (what the orchestrator calls before spawning):
     python3 spawn_guard.py selftest   -> exit 0 = semantics correct
 """
 import json
+import re
 import sys
 import time
 
@@ -41,16 +42,34 @@ def _parse_ts(s):
         return None
 
 
+# A RETRY IS THE SAME WORKER UNDER A NEW NAME. Measured 2026-10-17: a run errored and the fleet
+# re-issued it as `-r24b`, so a name-EXACT guard saw a brand-new worker and allowed the re-spawn.
+# Retry suffixes must be stripped before identity is compared. Only RETRY markers are stripped --
+# `-c1`, `-H4`, `-r3` inside a campaign id are part of the name, not a retry counter.
+_RETRY_SUFFIX = re.compile(r"-(?:r\d+[a-z]?|b\d*)$", re.I)
+
+def normalize_worker(name):
+    """'hunter-blue-seamdiff-r24b' -> 'hunter-blue-seamdiff'; unchanged when no retry suffix."""
+    n = (name or "").strip()
+    prev = None
+    while prev != n:
+        prev = n
+        n = _RETRY_SUFFIX.sub("", n)
+    return n
+
+
 def spawn_verdict(worker, events, window_min=WINDOW_MIN, now=None):
     """Return (action, reason, detail). action in {"allow","block"}.
 
     events: feed records (dicts) with `ts`, `kind` ("spawn"/"verdict"), `title`.
+    Identity is compared on the NORMALIZED name, so a retry under a new suffix is the same worker.
     """
     now = now if now is not None else time.time()
     cutoff = now - window_min * 60.0
+    target = normalize_worker(worker)
     mine = []
     for e in events or []:
-        if (e.get("title") or "") != worker:
+        if normalize_worker(e.get("title") or "") != target:
             continue
         t = _parse_ts(e.get("ts") or "")
         if t is None or t < cutoff:
@@ -133,6 +152,22 @@ def _selftest():
 
     # --- a verdict with no spawn still blocks (worker clearly ran) --------------
     ck("verdict-only -> block", spawn_verdict(W, [ev("verdict", W, 3)], now=NOW)[0] == "block")
+
+    # --- MEASURED 2026-10-17: a retry under a new suffix must be the SAME worker ---------
+    ck("normalize strips -r24", normalize_worker("scout-blue-manifest-r24") == "scout-blue-manifest")
+    ck("normalize strips -r24b", normalize_worker("hunter-blue-seamdiff-r24b") == "hunter-blue-seamdiff")
+    ck("normalize strips -b", normalize_worker("hunter-x-b") == "hunter-x")
+    ck("normalize leaves campaign ids alone (redteam-lombard-c1)",
+       normalize_worker("redteam-lombard-c1") == "redteam-lombard-c1")
+    ck("normalize leaves seat ids alone (hunter-H4-economic)",
+       normalize_worker("hunter-H4-economic") == "hunter-H4-economic")
+    ck("normalize leaves plain names alone", normalize_worker("hunter-gmx-logic") == "hunter-gmx-logic")
+    r = spawn_verdict("scout-blue-manifest-r24b", [ev("spawn", "scout-blue-manifest-r24", 5)], now=NOW)
+    ck("retry under a new suffix -> BLOCK (was allowed)", r[0] == "block", r)
+    r = spawn_verdict("hunter-blue-seamdiff-r24b",
+                      [ev("spawn", "hunter-blue-seamdiff-r24", 5), ev("report", "hunter-blue-seamdiff-r24", 4)],
+                      now=NOW)
+    ck("errored run re-issued as -b -> BLOCK", r[0] == "block", r)
 
     print("\n=== %d PASS / %d FAIL ===" % (p, f))
     return 1 if f else 0
