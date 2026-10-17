@@ -352,4 +352,28 @@ shorter than the 2h cadence. The guard is deliberately time-windowed rather than
 because the feed has no reliable run-start marker, and the window is a parameter so it can be
 retuned if the cadence changes. Self-test: `python3 .../scripts/spawn_guard.py selftest`.
 
+## 20. ROUTE THE MCP CALLS — never ride the NATS bridge from `exec` (operator, 2026-10-17)
+
+There are two ways to call an MCP tool. Only one of them is reliable, and it is the one that does
+NOT go near NATS:
+
+- **Native tools — the reliable path.** Call `list_tools` / `get_tool_info` / `call_tool` as
+  **native tool calls**. They do not need the sandbox and do not ride NATS.
+- **Sandbox code-mode MCP — the fragile path.** `from mcp_client import call_tool` (ASYNC) inside
+  `exec`, or `python mcp_client.py call-tool <server> <tool> '<json>'`. **This is the only path
+  that rides the NATS bridge**, and the bridge fails with
+  `NATS bridge setup failed; NATS bridge is required for MCP from Code Mode.`
+
+**Measured (2026-10-17):** 233 recorded NATS-bridge failures, and the counts are rising —
+18 · 61 · 14 · 23 · **35 on the most recent day**, the highest yet. The failures cluster in runs
+that used code-mode MCP; runs that stayed on native tools did not hit it at all.
+
+Rule: **do not call MCP from inside `exec`.** Use native tool calls. If you think you need a loop
+or a conditional over MCP calls, batch native calls instead, or do the loop over data you already
+have — a turn spent on a failed code-mode call costs more than the batching saves.
+
+Diagnosis: `python3 /opt/tfy/skills/hunt-doctrine/scripts/nats_probe.py` (measures how much the
+recorded runs depended on the fragile path). The companion `--plan` documents the N-sandbox load
+measurement, which is only worth running if you decide you want code-mode available at scale.
+
 
