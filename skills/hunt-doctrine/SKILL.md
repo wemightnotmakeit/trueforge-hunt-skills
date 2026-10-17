@@ -331,4 +331,25 @@ from git_safe import sync_push
 ok, why = sync_push("/opt/hunt-state", message="STATE: <campaign> turn end")
 ```
 
+## 19. CHECK BEFORE YOU SPAWN — a re-issued worker is duplicate spend (operator, 2026-10-17)
+
+Measured: in ONE run `redteam-lombard-c1` was spawned **24 times** and returned the same verdict
+24 times; all-time the feed shows 187 spawns for 129 distinct workers, i.e. **58 duplicate
+issues**. Each duplicate burns the single sandbox slot on work that was already done, and floods
+the ledger with identical rows. Doctrine already called this a "re-spawn storm" — a warning did
+not prevent it, so now there is a check.
+
+Before spawning ANY worker:
+```
+python3 /opt/tfy/skills/hunt-doctrine/scripts/spawn_guard.py \
+    --worker <name> --feed /opt/hunt-state/automation/feed.jsonl
+```
+It prints `{"action": "allow"|"block", "reason": ...}`. On **block, do not spawn** — the worker
+is either still in flight, or has already returned its verdict for this run. On allow, proceed.
+
+A worker MAY legitimately be re-spawned in a LATER run: the window is sized to one run and is
+shorter than the 2h cadence. The guard is deliberately time-windowed rather than run-id-keyed
+because the feed has no reliable run-start marker, and the window is a parameter so it can be
+retuned if the cadence changes. Self-test: `python3 .../scripts/spawn_guard.py selftest`.
+
 
