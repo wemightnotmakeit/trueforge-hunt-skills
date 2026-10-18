@@ -82,10 +82,32 @@ Log ALL THREE attempts + results in the candidate packet - a candidate without f
 - **fork-ops** = MCP tool `fork_run` / `fork_status` / `fork_jobs` — executes forge tests on the operator
   PC (unrestricted network). Sandbox blocked (RPC, solc gap, compile fail)? Route the proof through
   fork-ops; its raw output is valid evidence (same bar: no output, no finding).
-- **Scheduled campaigns**: the fleet runs under a TrueForge schedule ("auto-campaign"). Every scheduled
-  run MUST end around minute 50 with: state synced (BOARD/DEAD/STATE + hunt-state push), kills recorded,
-  and a loud report of any survivor. The next scheduled run resumes from your artifacts — leave nothing
-  only in your head.
+- **Scheduled campaigns**: the fleet runs under a TrueForge schedule ("auto-campaign"). A run is a
+  45-minute clock against **ONE primary target** (+ at most one secondary inherited from the previous
+  run). SUCCESS at the wall = **ALL** of: target (verbatim from SCOPE.md); hypotheses_tested >= 3,
+  each with the guard or path that defeated it; files_read >= 5 (paths listed); hunt_steps >= 10 (a
+  grep / diff / chain-read / trace, each with raw output); verdict in {KILL, CANDIDATE, FORK-PENDING};
+  evidence (file:line, address, or pasted raw output) on every claim; ledger updated (DEAD.md for a
+  KILL, `candidates/<id>/` otherwise). **A run missing any field is a FAILED run, not a dry run.** Two
+  failed runs in a row = stop and re-brief; do not schedule a third. Never open target #2 before
+  target #1's report is filed.
+- **A KILL is allowed only after an EXPLICIT GUARD-HUNT**: grep the claimed bug's trigger path for the
+  modifier / require / revert patterns (plus inherited contracts), read the enforcing function's lines,
+  and paste them with one sentence on why that guard does NOT apply to the trigger path. A kill citing
+  a summary ("looks fine", "seems guarded") is INVALID — redo the run.
+- **FORK-PENDING is a first-class verdict.** Report the exact test file path, the exact forge command,
+  and the expected revert/assertion. It BLOCKS the target's re-queue until `candidates/<id>/result.json`
+  lands from the proof watcher. **A CANDIDATE is a win — escalation, not an unfinished kill.**
+- **Why this replaced the old clock contract**: the previous wording graded only "state synced + kills
+  recorded", which made terminating the only guaranteed win and — with the proof loop broken — the only
+  provable outcome. That produced a 66:1 DEAD:FINDINGS ratio. Depth and escalation must be countable.
+- **Board death**: when the board is dead, the run's 45 minutes go to the SUPPLY SWEEP, not to hunting
+  pre-killed leads (negative EV). If the sweep returns zero seam events two weeks running, STOP
+  scheduling runs, keep only the weekly sweep + the proof watcher alive, and record the death in
+  DEAD.md with the sweep counts. Running empty clocks is not a campaign.
+- **Examine-or-void**: every guard-positive candidate gets either an examination or a VOID with a
+  recorded reason before a wave closes. Never leave a lead parked and unexamined — a g=7 candidate once
+  sat untouched on our own board while other leads were re-derived.
 
 ## 12. Tool surface & MCP API (read BEFORE your first tool call)
 There are TWO different tool surfaces. Confusing them burns your turn wall and returns NOTHING.
