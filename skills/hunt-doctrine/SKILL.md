@@ -23,6 +23,7 @@ Deployed ≠ repo. The gap is where live bugs hide:
 2. Get repo HEAD + recent commits touching in-scope files.
 3. Find fixes that are **merged but NOT deployed** — each is a documented, live vulnerability (the project proved the bug themselves).
 4. Reproduce pre-fix behavior (worktree at the fix's parent) — the fix's own test often IS the PoC.
+5. **Watch OPEN PRs, not just merges.** Security-shaped diffs on public branches (especially `fix/*`) are seams before they land — an unmerged fix is a live bug with weeks of head start. Sweep open PRs touching in-scope files on every pass; an open fix marks a candidate.
 
 **A FAILED COMMAND IS NOT EVIDENCE OF ABSENCE (measured failure).** `git log <parent>..HEAD -- <files>`
 returning nothing is only meaningful if the clone SUCCEEDED and the command actually RAN. A flaky
@@ -38,13 +39,14 @@ TOOLING failure to report and route around (`local_worker`), never a narrow seam
 - Sweep before building: known corpus, GitHub PRs/issues, program comments, and web search over Solodit's indexed pages (`site:solodit.cyfrin.io <mechanism>` — keyless; the Solodit API is now paid-tier). Record the sweep.
 - Known-issue close needs the FULL mechanism + impact matched — "related" is not "same". If the fix is public but undeployed, the live vulnerable build is your counter.
 
-## 4. Execution gates (every finding passes all four)
+## 4. Execution gates (every finding passes all five)
 | Gate | Question | Evidence |
 |---|---|---|
 | G1 Scope | Is the asset in scope per the exact list? | quote the scope line |
 | G2 Dupe | Is this mechanism already known/reported? | sweep receipt |
 | G3 Repro | Does a one-command repro show the impact? | raw green output + pinned block |
 | G4 Verify | Did a SECOND party re-run it from scratch? | verifier's raw output |
+| G5 Window | Still private — and is the clock running? | public-writeup sweep (forum / newsletter / release notes / PR chatter); file or drop within 24–48h of confirmation |
 
 ## 5. Impact amplification (before closing any MEDIUM)
 Try to CHAIN: compose this bug with one other (same target or adjacent) into a CRITICAL impact before submitting — chains pay at the top severity and rarely get duplicated. If no chain exists after one honest pass, ship the medium alone.
