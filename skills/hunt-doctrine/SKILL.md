@@ -138,23 +138,38 @@ If you need to DISCOVER tools, use the native `list_tools` tool. Never try to li
 import produces zero output and looks, from the outside, exactly like laziness. It is not: it is a
 tooling dead end, and the fix is to route around it and say so.
 
-## 13. The local bridge (sandbox egress is NOT your limit)
-The sandbox is network-restricted, but there is an **unrestricted machine behind it**. Use it
-instead of giving up on a blocked fetch:
+## 13. The sandbox is FULLY EQUIPPED — execute in it (verified 2026-10-20)
 
-- **`local_worker`** (fork-ops MCP) — spawns the LOCAL agent on the operator PC with the FULL
-  toolset and **unrestricted network**. Use it for: fetching a URL the sandbox cannot reach
-  (Cloudflare/bot-wall/timeout), pulling a blocked resource, or any multi-step local operation.
+**Do not assume the sandbox is limited. It is not.** Measured inside a live `hunt-base` sandbox
+on 2026-10-20:
+
+- **Network: open.** `POST eth_blockNumber` → block 26,231,860 · github.com `200` · blockscout
+  `200` · release binaries download (79 MB Foundry tarball, `200`).
+- **Toolchain: installed.** `forge` 1.8.5 · `cast` 1.8.5 · `anvil` · `solc` (auto-installs any
+  version on demand — it fetched 0.8.37 mid-test) · `halmos` · `git` · `python3` · `jq` · `rg` ·
+  `curl` · `gcc` · `make`.
+- **Fork tests run here.** `forge test --fork-url https://ethereum-rpc.publicnode.com` → **PASS
+  in ~0.3 s**, forked at a live block. You do not need anyone else to execute a proof for you.
+
+**Therefore: run the test yourself, in your sandbox, first.** Execution is the default, not the
+deferral. A candidate you never executed is a lead, not a finding.
+
+`fork-ops` is a **FALLBACK, not the primary path.** Use it only when the sandbox genuinely fails:
+imports that will not resolve, a solc version that will not download, or a URL behind Cloudflare.
+When you use it, name which of those happened — one line, with the raw error.
+
+- **`local_worker`** (fork-ops MCP) — local agent on the operator PC, full toolset, unrestricted
+  network. For URLs the sandbox cannot reach (Cloudflare / bot-wall / timeout).
   `{"task": "<precise instruction>"}` -> job_id -> poll `fork_status`.
-- **`fork_run`** (fork-ops MCP) — runs a Foundry test suite on the operator PC: unrestricted RPC,
-  local foundry, any solc version. Use it when the sandbox cannot compile, lacks solc, or cannot
-  reach the RPC. Its raw output is valid evidence (same bar: no output, no finding).
-- **`cleanup_sandboxes`** — call it if you are blocked by "Total memory limit exceeded" (the org
-  cap is 10 GiB and one sandbox is 8 GiB, so exactly ONE sandbox agent runs at a time; a leaked
-  sandbox from a previous run will block you).
+- **`fork_run`** (fork-ops MCP) — Foundry suite on the operator PC. For sandbox compile failures
+  or a blocked RPC. Its raw output is valid evidence (same bar: no output, no finding).
+- **Do NOT call `cleanup_sandboxes` for quota reasons.** The org is on **Tier 2** (100 vCPU /
+  200 GiB / 300 GiB) and holds ~26 GiB at peak — multiple hunters run concurrently. If creation
+  fails it is a transient slot race: retry once, then report it. Do not assume a 10 GiB cap, and
+  never destroy a sandbox you do not own.
 
-**If a fetch fails in the sandbox, the answer is `local_worker`, not "source unavailable".**
-Saying "the source is behind Cloudflare so I could not proceed" is a self-inflicted dead end.
+**A fetch that fails is `local_worker`. A test that can run is YOURS to run.**
+Saying "the source is behind Cloudflare so I could not proceed" is still a self-inflicted dead end.
 
 ## 14. READ-FIRST / WRITE-LAST (memory across runs)
 
